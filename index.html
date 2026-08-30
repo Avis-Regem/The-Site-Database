@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Site Database</title>
+    <style>
+        /* This centers everything on the screen and sets a cool background color */
+        body {
+            background-color: #7b1fa2;
+            /* Purple background like the original */
+            color: white;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 0px #4a148c;
+        }
+
+        /* The big "PLEASE" button styling */
+        button {
+            background-color: #ffeb3b;
+            /* Bright yellow button */
+            color: #4a148c;
+            border: 5px solid #4a148c;
+            padding: 20px 60px;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 6px 6px 0px #000;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        /* Makes the button look bouncy when you hover and click */
+        button:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px #000;
+        }
+
+        button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 2px 2px 0px #000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Take me to a useless site...</h1>
+        <button id="spin-btn">Let's Go!</button>
+    </div>
+
+    <script>
+        document.getElementById('spin-btn').addEventListener('click', async () => {
+            try {
+                // 1. Fetch your raw links.txt file automatically
+                const response = await fetch('links.txt');
+                const text = await response.text();
+
+                // 2. Split the file by line breaks, clean up spaces, and ignore empty lines
+                const sites = text.split('\n')
+                    .map(site => site.trim())
+                    .filter(site => site.length > 0);
+
+                // 3. Fallback check just in case the file is empty
+                if (sites.length === 0) {
+                    alert("Your links.txt file seems to be empty!");
+                    return;
+                }
+
+                // 4. Pick a random link from the list
+                const randomSite = sites[Math.floor(Math.random() * sites.length)];
+
+                // 5. Open the random website in a brand new browser tab
+                window.open(randomSite, '_blank');
+
+            } catch (error) {
+                console.error("Error loading the text file:", error);
+                alert("Oops! Could not read links.txt. (If you are opening this file locally on your computer, browsers block this for security. It will work perfectly once uploaded to GitHub!)");
+            }
+        });
+    </script>
+</body>
+
+</html>
