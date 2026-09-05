@@ -1,41 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Site Database</title>
     <style>
-        /* This centers everything on the screen and sets a cool background color */
         body {
             background-color: #7b1fa2;
-            /* Purple background like the original */
             color: white;
             font-family: 'Arial Black', Gadget, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            padding: 40px 20px;
+            box-sizing: border-box;
         }
 
         .container {
             text-align: center;
-            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 50px;
         }
 
         h1 {
             font-size: 3.5rem;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             text-shadow: 3px 3px 0px #4a148c;
         }
 
-        /* The big "PLEASE" button styling */
-        button {
+        /* Hero Button */
+        #spin-btn {
             background-color: #ffeb3b;
-            /* Bright yellow button */
             color: #4a148c;
             border: 5px solid #4a148c;
             padding: 20px 60px;
@@ -45,58 +43,214 @@
             border-radius: 12px;
             box-shadow: 6px 6px 0px #000;
             transition: transform 0.1s, box-shadow 0.1s;
+            margin-top: 20px;
         }
 
-        /* Makes the button look bouncy when you hover and click */
-        button:hover {
+        #spin-btn:hover {
             transform: translate(-2px, -2px);
             box-shadow: 8px 8px 0px #000;
         }
 
-        button:active {
+        #spin-btn:active {
             transform: translate(4px, 4px);
             box-shadow: 2px 2px 0px #000;
         }
+
+        /* Link Preview Box */
+        #preview-box {
+            margin: 25px auto 0 auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 2px dashed #ffeb3b;
+            display: none;
+            font-family: Arial, sans-serif;
+            word-break: break-all;
+        }
+
+        #preview-link {
+            color: #ffeb3b;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        #preview-link:hover {
+            text-decoration: underline;
+        }
+
+        .countdown-text {
+            font-size: 0.9rem;
+            color: #e0e0e0;
+            margin-top: 8px;
+        }
+
+        /* Directory List Section */
+        .directory-section {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            color: #333;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            font-family: Arial, sans-serif;
+            box-sizing: border-box;
+        }
+
+        .directory-section h2 {
+            margin-top: 0;
+            color: #4a148c;
+            font-family: 'Arial Black', sans-serif;
+            border-bottom: 3px solid #7b1fa2;
+            padding-bottom: 10px;
+        }
+
+        #site-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .site-item {
+            padding: 12px 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .site-item a {
+            color: #7b1fa2;
+            text-decoration: none;
+            font-weight: bold;
+            word-break: break-all;
+            display: block;
+        }
+
+        .site-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer Email Suggest */
+        .footer-suggest {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .footer-suggest a {
+            color: #7b1fa2;
+            font-weight: bold;
+        }
     </style>
 </head>
-
 <body>
 
     <div class="container">
         <h1>Take me to a really fun site...</h1>
         <button id="spin-btn">Let's Go!</button>
+
+        <!-- Preview box before navigating -->
+        <div id="preview-box">
+            <div>Next Destination:</div>
+            <a id="preview-link" href="#" target="_blank">Loading...</a>
+            <div class="countdown-text" id="countdown-text">Opening automatically in 3 seconds...</div>
+        </div>
     </div>
 
-    <script>
-        document.getElementById('spin-btn').addEventListener('click', async () => {
+    <!-- Directory Layout Box -->
+    <div class="directory-section">
+        <h2>Explore the Database</h2>
+        <ul id="site-list">
+            <!-- JavaScript dynamically fills this items list -->
+        </ul>
+
+        <div class="footer-suggest">
+            Have a crazy site? Email your suggestion to: 
+            <a href="mailto:krios2016alt.the-site-database@protonmail.com">krios2016alt.the-site-database@protonmail.com</a>
+        </div>
+    </div>
+
+    <script {nonce}>
+        let allSites = [];
+        let timer = null;
+
+        // Load the links.txt file and set up the interface elements
+        async function loadSites() {
             try {
-                // 1. Fetch your raw links.txt file automatically
                 const response = await fetch('links.txt');
                 const text = await response.text();
-
-                // 2. Split the file by line breaks, clean up spaces, and ignore empty lines
-                const sites = text.split('\n')
-                    .map(site => site.trim())
-                    .filter(site => site.length > 0);
-
-                // 3. Fallback check just in case the file is empty
-                if (sites.length === 0) {
-                    alert("Your links.txt file seems to be empty!");
+                
+                allSites = text.split('\n')
+                               .map(site => site.trim())
+                               .filter(site => site.length > 0);
+                
+                if (allSites.length === 0) {
+                    document.getElementById('site-list').innerHTML = "<li>No links found in links.txt</li>";
                     return;
                 }
 
-                // 4. Pick a random link from the list
-                const randomSite = sites[Math.floor(Math.random() * sites.length)];
-
-                // 5. Open the random website in a brand new browser tab
-                window.open(randomSite, '_blank');
+                renderDirectory();
 
             } catch (error) {
-                console.error("Error loading the text file:", error);
-                alert("Oops! Could not read links.txt. (If you are opening this file locally on your computer, browsers block this for security. It will work perfectly once uploaded to GitHub!)");
+                console.error("Error reading links.txt:", error);
             }
+        }
+
+        // Generate the clean list items
+        function renderDirectory() {
+            const listContainer = document.getElementById('site-list');
+            listContainer.innerHTML = ""; 
+
+            allSites.forEach((site) => {
+                const li = document.createElement('li');
+                li.className = 'site-item';
+
+                // Clean display label for the list items
+                const displayLabel = site.replace(/^https?:\/\/(www\.)?/, '');
+
+                li.innerHTML = `<a href="${site}" target="_blank">${displayLabel}</a>`;
+                listContainer.appendChild(li);
+            });
+        }
+
+        // Big Random Web Button Logic with 3-second redirect step
+        document.getElementById('spin-btn').addEventListener('click', () => {
+            if (allSites.length === 0) return;
+
+            // Clear any active running redirection countdowns
+            if (timer) clearInterval(timer);
+
+            const randomSite = allSites[Math.floor(Math.random() * allSites.length)];
+            
+            const previewBox = document.getElementById('preview-box');
+            const previewLink = document.getElementById('preview-link');
+            const countdownText = document.getElementById('countdown-text');
+
+            previewLink.href = randomSite;
+            previewLink.textContent = randomSite;
+            previewBox.style.display = 'block';
+
+            let secondsLeft = 3;
+            countdownText.textContent = `Opening automatically in ${secondsLeft} seconds...`;
+
+            timer = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft <= 0) {
+                    clearInterval(timer);
+                    window.open(randomSite, '_blank');
+                } else {
+                    countdownText.textContent = `Opening automatically in ${secondsLeft} seconds...`;
+                }
+            }, 1000);
         });
+
+        // Initialize setup routine
+        loadSites();
     </script>
 </body>
-
 </html>
+
