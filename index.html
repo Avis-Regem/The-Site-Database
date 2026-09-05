@@ -174,14 +174,15 @@
         </div>
     </div>
 
-    <script {nonce}>
+    <script>
         let allSites = [];
         let timer = null;
 
         // Load the links.txt file and set up the interface elements
         async function loadSites() {
             try {
-                const response = await fetch('links.txt');
+                // The "?t=" part forces the browser to download your latest updates instantly
+                const response = await fetch('links.txt?t=' + Date.now());
                 const text = await response.text();
                 
                 allSites = text.split('\n')
@@ -253,4 +254,3 @@
     </script>
 </body>
 </html>
-
